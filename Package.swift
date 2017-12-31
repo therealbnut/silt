@@ -40,5 +40,8 @@ let package = Package(
     .target(
       name: "Mantle",
       dependencies: ["Lithosphere", "Moho", "Utility"]),
+    .target(
+      name: "OuterCore",
+      dependencies: ["Crust"]),
   ]
 )
