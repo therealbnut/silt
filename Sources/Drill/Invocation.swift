@@ -39,8 +39,8 @@ public struct Invocation {
   ///         otherwise. It is safe to force-unwrap.
   private func makeVerifyPass<PassTy: PassProtocol>(
     url: URL, pass: PassTy, context: PassContext
-  ) -> Pass<PassTy.Input, HadErrors> {
-    return Pass(name: "Diagnostic Verification") { input, ctx in
+  ) -> BlockPass<PassTy.Input, HadErrors> {
+    return BlockPass(name: "Diagnostic Verification") { input, ctx in
       _ = pass.run(input, in: ctx)
       let verifier =
         DiagnosticVerifier(url: url,
@@ -93,33 +93,33 @@ public struct Invocation {
       case .compile:
         fatalError("only Parse is implemented")
       case .dump(.tokens):
-        run(lexFile |> Pass(name: "Describe Tokens") { tokens, _ in
+        run(lexFile |> BlockPass(name: "Describe Tokens") { tokens, _ in
           TokenDescriber.describe(tokens, to: &stdoutStreamHandle)
         })
       case .dump(.file):
-        run(lexFile |> Pass(name: "Reprint File") { tokens, _ -> Void in
+        run(lexFile |> BlockPass(name: "Reprint File") { tokens, _ -> Void in
           for token in tokens {
             token.writeSourceText(to: &stdoutStreamHandle,
                                   includeImplicit: false)
           }
         })
       case .dump(.shined):
-        run(shineFile |> Pass(name: "Dump Shined") { tokens, _ in
+        run(shineFile |> BlockPass(name: "Dump Shined") { tokens, _ in
           for token in tokens {
             token.writeSourceText(to: &stdoutStreamHandle,
                                   includeImplicit: true)
           }
         })
       case .dump(.parse):
-        run(parseFile |> Pass(name: "Dump Parsed") { module, _ in
+        run(parseFile |> BlockPass(name: "Dump Parsed") { module, _ in
           SyntaxDumper(stream: &stderrStreamHandle).dump(module)
         })
       case .dump(.scopes):
-        run(scopeCheckFile |> Pass(name: "Dump Scopes") { module, _ in
+        run(scopeCheckFile |> BlockPass(name: "Dump Scopes") { module, _ in
           print(module)
         })
       case .dump(.typecheck):
-        run(typeCheckFile |> Pass(name: "Type Check") { module, _ in
+        run(typeCheckFile |> BlockPass(name: "Type Check") { module, _ in
           print(module)
         })
       case .verify(let verification):

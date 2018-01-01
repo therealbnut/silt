@@ -13,7 +13,10 @@ import Lithosphere
 /// and `(B) -> C` into one pass, `(A) -> C`.
 struct PassComposition<PassA: PassProtocol, PassB: PassProtocol>: PassProtocol
   where PassA.Output == PassB.Input {
-  let name = "PassComposition"
+
+  var name: String {
+    return "(\(passA.name) |> \(passB.name))"
+  }
 
   /// The first pass to execute.
   let passA: PassA
@@ -46,7 +49,7 @@ infix operator |> : AdditionPrecedence
 ///   - passA: The first pass to run.
 ///   - passB: The second pass to run if the first succeeds.
 /// - Returns: The output of the second pass, or `nil` if either pass failed.
-func |> <PassA: PassProtocol, PassB: PassProtocol>(
-  passA: PassA, passB: PassB) -> PassComposition<PassA, PassB> {
-  return PassComposition(passA: passA, passB: passB)
+func |> <PassA: PassProtocol, PassB: PassProtocol>(passA: PassA, passB: PassB)
+  -> AnyPass<PassA.Input, PassB.Output> where PassA.Output == PassB.Input {
+  return passA.composed(before: passB)
 }

@@ -1,4 +1,4 @@
-/// Pass.swift
+/// BlockPass.swift
 ///
 /// Copyright 2017, The Silt Language Project.
 ///
@@ -8,10 +8,10 @@
 import Foundation
 import Lithosphere
 
-/// A Pass is the most common currency for compiler passes. It wraps a function
-/// with the same signature as `PassProtocol`'s `run` method, and is responsible
-/// for invoking the pass timer before executing its actions.
-struct Pass<In, Out>: PassProtocol {
+/// A BlockPass is the most common currency for compiler passes. It wraps a
+/// function with the same signature as `PassProtocol`'s `run` method, and is
+/// responsible for invoking the pass timer before executing its actions.
+struct BlockPass<In, Out>: PassProtocol {
   /// The input is generic to each pass.
   typealias Input = In
 

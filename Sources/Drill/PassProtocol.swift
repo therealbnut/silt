@@ -27,4 +27,30 @@ protocol PassProtocol {
   /// - returns: An optional transformed value based on the input. If this
   ///            pass failed, it should return `nil` from this method.
   func run(_ input: Input, in context: PassContext) -> Output?
+
+  /// Creates a new pass, such that the output from a successful run of `self`
+  /// is given to `next` and run.
+  func composed<Before: PassProtocol>(before that: Before)
+    -> AnyPass<Input,Before.Output> where Output == Before.Input
+
+  /// Creates a new pass, such that the output from a successful run of `that`
+  /// is given to `self` and run.
+  func composed<After: PassProtocol>(after that: After)
+    -> AnyPass<After.Input,Output> where After.Output == Input
+}
+
+extension PassProtocol {
+
+  public func composed<Before: PassProtocol>(before that: Before)
+    -> AnyPass<Input,Before.Output> where Output == Before.Input
+  {
+    return AnyPass(PassComposition(passA: self, passB: that))
+  }
+
+  public func composed<After: PassProtocol>(after that: After)
+    -> AnyPass<After.Input,Output> where After.Output == Input
+  {
+    return AnyPass(PassComposition(passA: that, passB: self))
+  }
+
 }
