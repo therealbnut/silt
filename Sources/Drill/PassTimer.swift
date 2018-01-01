@@ -11,11 +11,8 @@ import Foundation
 /// passes. It also includes behavior to dump a table of values representing the
 /// times of all passes run in the compile session.
 class PassTimer {
-  /// The order of passes executed.
-  private var passOrder = [String]()
-
-  /// The time taken for each pass.
-  private var timings = [String: TimeInterval]()
+  /// The order passes are executed, and the time taken for each pass.
+  private var passes = [(String, TimeInterval)]()
 
 
   /// Measures the time taken for the underlying block, and returns whatever
@@ -29,8 +26,7 @@ class PassTimer {
     // FIXME: Date() is wasteful here...
     let start = Date()
     defer {
-      passOrder.append(pass)
-      timings[pass, default: 0] += Date().timeIntervalSince(start)
+      passes.append((pass, Date().timeIntervalSince(start)))
     }
     return actions()
   }
@@ -41,13 +37,9 @@ class PassTimer {
   /// - Parameter target: The stream to write the table to.
   func dump<Target: TextOutputStream>(to target: inout Target) {
     var columns = [Column(title: "Pass"), Column(title: "Time")]
-    for pass in passOrder {
+    for (pass, time) in passes {
       columns[0].rows.append(pass)
-      if let time = timings[pass] {
-        columns[1].rows.append(time.formatted)
-      } else {
-        columns[1].rows.append("N/A")
-      }
+      columns[1].rows.append(time.formatted)
     }
     TableFormatter.write(columns: columns, to: &target)
   }
